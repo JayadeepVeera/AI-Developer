@@ -1,1 +1,77 @@
-We built a small two‑agent educational app with a Streamlit UI: first we created a Python project folder and inside it we wrote four core files—`generator_agent.py` (a GeneratorAgent class that takes structured input `{grade, topic}` and returns structured content `{ "explanation": str, "mcqs": [ { "question", "options", "answer" } ] }` for topics like “Types of angles” using simple, grade‑appropriate text and deterministic MCQ templates), `reviewer_agent.py` (a ReviewerAgent class that takes the generator’s JSON output plus the grade and returns `{ "status": "pass" | "fail", "feedback": [str] }` by running simple rules: checking sentence length for age appropriateness, verifying that key concepts like “angle”, “right angle”, “acute angle”, “obtuse angle” appear in the explanation, and validating that each MCQ has exactly 4 options and an answer contained in those options), `pipeline.py` (a `run_pipeline(grade, topic)` function that orchestrates the flow by calling the Generator once, then the Reviewer, and if `status == "fail"` calling the Generator a second time with the reviewer’s feedback to produce a refined output, limited to that single refinement pass), and `app.py` (a Streamlit UI that shows an Input section for grade and topic, a button “Run Agent Pipeline” that triggers `run_pipeline`, and three result sections: “Generator Output” showing the explanation and MCQs, “Reviewer Feedback” showing PASS/FAIL and feedback messages, and “Refined Output (if any)” showing the refined explanation + MCQs when the first attempt fails, which for Grade 4 happens because we deliberately made the first sentence a bit long so the reviewer flags it and the refined explanation switches to shorter, simpler sentences).
+# AI Assessment: Agent-Based, UI-Driven
+
+This project is a small educational app built with Python and Streamlit. It uses two simple AI-style agents to generate and review learning content for a given grade and topic.
+
+---
+
+## What the project does
+
+- **Generator Agent**
+  - Implemented in `generator_agent.py`.
+  - Takes structured input: `{ grade, topic }`.
+  - Returns structured output:
+    ```json
+    {
+      "explanation": "...",
+      "mcqs": [
+        {
+          "question": "...",
+          "options": ["A", "B", "C", "D"],
+          "answer": "B"
+        }
+      ]
+    }
+    ```
+  - For example, for the topic **"Types of angles"** (Grade 4), it generates:
+    - A short, age‑appropriate explanation.
+    - A set of MCQs with fixed options and correct answers.
+
+- **Reviewer Agent**
+  - Implemented in `reviewer_agent.py`.
+  - Takes the Generator’s JSON output + the grade.
+  - Returns:
+    ```json
+    {
+      "status": "pass" | "fail",
+      "feedback": ["..."]
+    }
+    ```
+  - Applies simple rules, such as:
+    - Checking sentence length for age appropriateness.
+    - Making sure key concepts like “angle”, “right angle”, “acute angle”, and “obtuse angle” are mentioned.
+    - Ensuring each MCQ has exactly 4 options and that the answer is one of them.
+
+- **Pipeline**
+  - Implemented in `pipeline.py`.
+  - Provides a `run_pipeline(grade, topic)` function that:
+    1. Calls the Generator Agent once.
+    2. Sends the result to the Reviewer Agent.
+    3. If the reviewer returns `fail`, calls the Generator Agent again with the feedback to produce a **refined** output.
+    4. Limits this to **one** refinement pass.
+
+- **Streamlit UI**
+  - Implemented in `app.py`.
+  - Shows:
+    - An **Input** section (grade and topic).
+    - A **Run Agent Pipeline** button that triggers `run_pipeline`.
+    - A **Generator Output** section (explanation + MCQs).
+    - A **Reviewer Feedback** section (PASS/FAIL and feedback messages).
+    - A **Refined Output (if any)** section that displays refined explanation and MCQs when the first attempt fails.
+  - For Grade 4, the first explanation is intentionally a bit long so the Reviewer flags it as too complex. The refined explanation then uses shorter, simpler sentences, showing the refinement logic working.
+
+---
+
+## How to run
+
+1. (Optional) Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   .\.venv\Scripts\activate
+2. Install dependencies:
+   ```bash
+   pip install streamlit
+3. Start the app:
+   ```bash
+   streamlit run app.py
+   
+
